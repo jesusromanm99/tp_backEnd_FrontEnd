@@ -10,95 +10,127 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Restaurapp</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ms-md-auto">
-                <li class="nav-item">
-                    <a target="_blank" rel="noopener" class="nav-link" href="https://github.com/jesusromanm99/tp_backEnd_FrontEnd"><i class="fa fa-github"></i> GitHub</a>
-                </li>
-            </ul>
+        <div class="container">
+            <div class="">
+                <a class="navbar-brand" href="#">Restaurapp</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./listaReservas.html">Lista de reservas
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-md-auto">
+                    <li class="nav-item">
+                        <a target="_blank" rel="noopener" class="nav-link" href="https://github.com/jesusromanm99/tp_backEnd_FrontEnd"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
     <div class="container">
-        <h2 class="mt-5">Reserva de restaurantes</h2>
-        <div id="app" class="row mt-4">
-            <div class="col-12 alert alert-danger" v-if="mensaje_error!=null">{{mensaje_error}}</div>
+        <div class="row mt-5">
+            <h2 class="col">Reserva de restaurantes</h2>
+            <div class="col my-auto">
+                <button class="btn btn-secondary">Crear restaurant</button>
+            </div>
+        </div>
+        <div id="app">
             <div class="row">
-                <div class="col-12 col-sm-6">
-                    <label for="selectRestaurant">Selecciona el restaurante</label>
-                    <select name="" id="selectRestaurant" v-model.number="restaurant_index" class="form-control">
-                        <option v-for="restaurante in restaurantes" :value="restaurante.id" selected>{{restaurante.nombre}}</option>
-                    </select>
+                <div class="col-12 alert alert-success mt-5" v-if="mensaje_exito!=null">{{mensaje_exito}}</div>
+                <div class="col-12 col-md-6">
+                    <div class="col-12 alert alert-danger" v-if="mensaje_error!=null">{{mensaje_error}}</div>
+                    <div class="row"> <!--RESTAURANT Y FECHA-->
+                        <div class="col-12 col-sm-6">
+                            <label for="selectRestaurant">Selecciona el restaurante</label>
+                            <select name="" id="selectRestaurant" v-model.number="restaurant_index" class="form-control">
+                                <option v-for="restaurante in restaurantes" :value="restaurante.id">{{restaurante.nombre}}</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="datePicker">Ingrese la fecha</label>
+                            <input type="date" required v-model="fecha" class="form-control" id="datePicker">
+                        </div>
+                    </div>
+                    <div class="row mt-0 mt-sm-3"> <!--HORA INCIO Y FIN-->
+                        <div class="col-12 col-sm-6">
+                            <label for="horaInicio"> Selecciona hora inicio de la reserva</label>
+                            <select name="" required id="horaInicio" v-model.number="hora_inicio"  class="form-control">
+                                <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="horaFin"> Selecciona hora fin de la reserva</label>
+                            <select name="" required id="horaFin" v-model.number="hora_fin" class="form-control">
+                                <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row text-center mt-4"> <!--BUTTON RESERVA-->
+                        <div class="col-12">
+                            <button @click="buscar_reservas" type="button" class="btn btn-primary">Buscar Reservas Disponibles</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12 col-sm-6">
-                    <label for="datePicker">Ingrese la fecha</label>
-                    <input type="date" required v-model="fecha" class="form-control" id="datePicker">
+                <div class="col-12 col-md-6"> <!--SELECCION DE MESAS-->
+                    <div class="MesasDisponibles" v-if="mesasDispobibles.length">
+                        <h5>Seleccione una opcion entre las mesas disponibles:</h5>
+                        <ul class="list-unstyled mt-3">
+                            <li v-for="mesa in mesasDispobibles" class="mb-2">
+                                <input class="form-check-input" type="radio" v-bind:id="'mesa'+mesa.id" :value="mesa" v-model="mesaObject"> 
+                                <label class="form-check-label" v-bind:for="'mesa'+mesa.id">
+                                    {{mesa.nombre}}
+                                    <span class="badge bg-primary">Planta {{mesa.planta}}</span>
+                                    <span class="badge bg-info">{{mesa.capacidad}} personas</span>
+                                </label>
+                            </li>
+                        </ul>
+                        <div class="Buscar_cedula row">
+                            <div class="col-12">
+                                <label for="cedula">Ingrese su numero cedula:</label>
+                                <input type="number" id="cedula" class="form-control" v-model="cliente.cedula">
+                            </div>
+                            <div class="col-12 text-center mt-4">
+                                <button class="btn btn-primary" @click="buscar_cedula">Buscar Cedula</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="row mt-0 mt-sm-3">
-                <div class="col-12 col-sm-6">
-                    <label for="horaInicio"> Selecciona hora inicio de la reserva</label>
-                    <select name="" required id="horaInicio" v-model.number="hora_inicio"  class="form-control">
-                        <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
-                    </select>
-                </div>
-                <div class="col-12 col-sm-6">
-                    <label for="horaFin"> Selecciona hora fin de la reserva</label>
-                    <select name="" required id="horaFin" v-model.number="hora_fin" class="form-control">
-                        <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row text-center mt-4">
-                <div class="col-12">
-                    <button @click="buscar_reservas" type="button" class="btn btn-primary">Buscar Reservas Disponibles</button>
+            
+            <div class="ingresarCliente row mt-5" v-if="!findCedula">
+                <div class="col-10 row">
+                    <h4 class="col-12">El Cliente con cedula {{cliente.cedula}}, aun no esta registrado, por favor ingrese sus datos</h4>
+                    <div class="col-12 col-md-6">
+                        <label for="nombreCliente">Ingrese el nombre</label> 
+                        <input class="form-control" id="nombreCliente" v-model="cliente.nombre" type="text">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="apellidoCliente">Ingrese el apellido</label>
+                        <input class="form-control" id="apellidoCliente" v-model="cliente.apellido" type="text">
+                    </div>
+                    <div class="col-12 text-center mt-4">
+                        <button @click="confirmar_datos" class="btn btn-primary">Confirmar Datos</button>
+                    </div>
                 </div>
             </div>
-            <div class="MesasDisponibles" v-if="mesasDispobibles.length">
-                <table>
-                    <tr>
-                        <td>nombre</td>
-                        <td> Planta</td>
-                        <td>Capacidad</td>
-                        <td>Seleccione la opcion</td>
-                    </tr>
-                    <tr v-for="mesa in mesasDispobibles">
-                        <td>{{mesa.nombre}}</td>
-                        <td> {{mesa.planta}}</td>
-                        <td>{{mesa.capacidad}}</td>
-                        <td> <input type="radio" id="uno" :value="mesa" v-model="mesaObject"> </td>
-                    </tr>
-                </table>
-                <br><br>
-                <div class="Buscar_cedula">
-                    <label>Ingrese su numero cedula:</label>
-                    <input type="number" v-model="cliente.cedula">
-                    <button @click="buscar_cedula">Buscar Cedula</button>
-                </div>
-            </div>
-            <div class="ingresarCliente" v-if="!findCedula">
-                <h3>El Cliente con cedula {{cliente.cedula}}, aun no esta registrado, por favor ingrese sus datos</h3>
-                <label>Ingrese el nombre</label> <input v-model="cliente.nombre" type="text"><br>
-                <label>Ingrese el apellido</label> <input v-model="cliente.apellido" type="text"><br>
-                <label> Cedula: </label> {{cliente.cedula}}<br>
-                <button @click="confirmar_datos">Confirmar Datos</button>
-            </div>
-            <div class="detallesReserva" v-if="reservaLista">
-                <table>
-                    <tr>
-                        <td> fecha</td>
-                        <td>HoraInicioReserva</td>
-                        <td>HoraFinReserva</td>   
-                        <td>Nombre de la mesa</td>
-                        <td>Capacidad de la mesa</td>
-                        <td>Nombre Cliente</td>
-                        <td>Apellido Cliente</td>
-                        <td>CedulaCliente</td>
+            <div class="detallesReserva mt-5 row" v-if="reservaLista">
+                <table class="table">
+                    <tr class="table-primary">
+                        <th>Fecha</th>
+                        <th>HoraInicioReserva</th>
+                        <th>HoraFinReserva</th>   
+                        <th>Nombre de la mesa</th>
+                        <th>Personas</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Cedula</th>
                     </tr>
                     <tr>
                         <td>{{reserva.fecha}}</td>
@@ -111,7 +143,7 @@
                         <td>{{cliente.cedula}}</td>
                     </tr>
                 </table>
-                <button @click="guardar_reserva">Guardar reserva</button>
+                <button @click="guardar_reserva" class="btn btn-primary col-8 mx-auto">Guardar reserva</button>
             </div>
         </div>
     </div>
