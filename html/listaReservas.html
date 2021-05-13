@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <title>Restaurapp</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <div class="">
+                <a class="navbar-brand" href="./reserva.html">Restaurapp</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-md-auto">
+                    <li class="nav-item">
+                        <a target="_blank" rel="noopener" class="nav-link" href="https://github.com/jesusromanm99/tp_backEnd_FrontEnd"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="app">
+        <div class="container">
+            <div class="filtros row mt-4">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label for="selectRestaurant">Filtro restaurante</label>
+                    <select name="" id="selectRestaurant" v-model.number="restaurant_index" class="form-control">
+                        <option value="">Todos</option>
+                        <option v-for="restaurante in restaurantes" :value="restaurante.id">{{restaurante.nombre}}</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label for="datePicker">Filtro fecha</label>
+                    <input type="date" required v-model="fecha" class="form-control" id="datePicker">
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label for="selectCli">Filtro cliente</label>
+                    <select name="" id="selectCli" v-model.number="cliente_index" class="form-control">
+                        <option value="">Todos</option>
+                        <option v-for="cliente in clientes" :value="cliente.id">{{`${cliente.nombre} ${cliente.apellido}`}}</option>
+                    </select>
+                </div>
+                <div class="col-12 mt-3">
+                    <button class="btn btn-primary" @click="filtrar">Filtrar</button>
+                </div>
+            </div>
+            <table class="table mt-5">
+                <tr class="table-primary">
+                    <th>Fecha</th>
+                    <th>Restaurant</th>
+                    <th>HoraInicioReserva</th>
+                    <th>HoraFinReserva</th>   
+                    <th>Nombre de la mesa</th>
+                    <th>Capacidad</th>
+                    <th>Cliente</th>
+                </tr>
+                
+                <tr v-for="reserva in reservas">
+                    <td>{{new Date(reserva.fecha).toLocaleDateString()}}</td>
+                    <td>{{reserva.restaurant.nombre}}</td>
+                    <td>{{reserva.hora_inicial}}</td>
+                    <td>{{reserva.hora_final}}</td>
+                    <td>{{reserva.mesa.nombre}}</td>
+                    <td>{{reserva.mesa.capacidad}}</td>
+                    <td>{{`${reserva.cliente.nombre} ${reserva.cliente.apellido}`}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../js/listaReserva.js"></script>
+</body>
+</html>
