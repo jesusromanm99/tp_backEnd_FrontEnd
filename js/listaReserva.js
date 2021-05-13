@@ -72,13 +72,23 @@ const app= new Vue({
 
     },
     beforeCreate: async function() {
-        const reservasRaw = await get_todos_reservas();
+        let reservasRaw = await get_todos_reservas();
         
         for (let i = 0; i < reservasRaw.length; i++) {
             reservasRaw[i].restaurant = await get_restaurant(reservasRaw[i].id_restaurante);
             reservasRaw[i].cliente = await get_cliente(reservasRaw[i].id_cliente);
             reservasRaw[i].mesa = await get_mesa(reservasRaw[i].id_mesa);
         }
+        reservasRaw = reservasRaw.sort( (reserva1, reserva2) => {
+            if(reserva1.fecha < reserva2.fecha){
+                return -1;
+            }else if(reserva1.fecha > reserva2.fecha){
+                return 1;
+            }
+            const resDif = reserva1.hora_inicial - reserva2.hora_inicial;
+            if(resDif) return resDif;
+            else return reserva1.id_mesa - reserva2.id_mesa;
+        } );
         this.allReservas = reservasRaw;
         this.showingReservas = reservasRaw;
         this.restaurantes = await get_todos_restaurantes();
