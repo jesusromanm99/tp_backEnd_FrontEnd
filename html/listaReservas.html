@@ -32,7 +32,7 @@
                 <div class="col-12 col-sm-6 col-md-4">
                     <label for="selectRestaurant">Filtro restaurante</label>
                     <select name="" id="selectRestaurant" v-model.number="restaurant_index" class="form-control">
-                        <option value="">Todos</option>
+                        <option value="0">Todos</option>
                         <option v-for="restaurante in restaurantes" :value="restaurante.id">{{restaurante.nombre}}</option>
                     </select>
                 </div>
@@ -43,7 +43,7 @@
                 <div class="col-12 col-sm-6 col-md-4">
                     <label for="selectCli">Filtro cliente</label>
                     <select name="" id="selectCli" v-model.number="cliente_index" class="form-control">
-                        <option value="">Todos</option>
+                        <option value="0">Todos</option>
                         <option v-for="cliente in clientes" :value="cliente.id">{{`${cliente.nombre} ${cliente.apellido}`}}</option>
                     </select>
                 </div>
@@ -62,7 +62,7 @@
                     <th>Cliente</th>
                 </tr>
                 
-                <tr v-for="reserva in reservas">
+                <tr v-for="reserva in showingReservas">
                     <td>{{new Date(reserva.fecha).toLocaleDateString()}}</td>
                     <td>{{reserva.restaurant.nombre}}</td>
                     <td>{{reserva.hora_inicial}}</td>

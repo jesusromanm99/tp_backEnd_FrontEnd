@@ -7,6 +7,11 @@ const get_todos_reservas = async() =>{
         return data;
     }
 }
+const compare_dates = (date1, date2) =>{
+    //console.log( date1.getDate(), date1.getMonth(), date1.getYear() );
+    //console.log( date2.getDate(), date2.getMonth(), date2.getYear() );
+    return date1.getDate() === date2.getDate() && date1.getMonth() === date2.getMonth() && date1.getYear() === date2.getYear();
+}
 const get_todos_restaurantes = async()=>{
     const res = await fetch(`${ENDPOINT}api/restaurant/`);
     if(res){
@@ -57,11 +62,12 @@ const get_mesa = async(id) => {
 const app= new Vue({
     el:"#app",
     data:{
-        reservas:[],
+        allReservas:[],
+        showingReservas:[],
         restaurantes:[],
-        restaurant_index: -1,
+        restaurant_index: 0,
         clientes:[],
-        cliente_index: -1,
+        cliente_index: 0,
         fecha:null,
 
     },
@@ -70,18 +76,30 @@ const app= new Vue({
         
         for (let i = 0; i < reservasRaw.length; i++) {
             reservasRaw[i].restaurant = await get_restaurant(reservasRaw[i].id_restaurante);
-            reservasRaw[i].cliente = await get_cliente(reservasRaw[i].id_restaurante);
-            reservasRaw[i].mesa = await get_mesa(reservasRaw[i].id_restaurante);
+            reservasRaw[i].cliente = await get_cliente(reservasRaw[i].id_cliente);
+            reservasRaw[i].mesa = await get_mesa(reservasRaw[i].id_mesa);
         }
-        this.reservas = reservasRaw;
+        this.allReservas = reservasRaw;
+        this.showingReservas = reservasRaw;
         this.restaurantes = await get_todos_restaurantes();
         this.clientes = await get_todos_clientes();
         
-        console.log(this.reservas);
+        console.log(this.showingReservas);
     },
     methods:{
         filtrar: function(){
-            console.log(this.restaurant_index);
+            let reservasAux = this.allReservas;
+            if(this.restaurant_index){
+                reservasAux = reservasAux.filter(reserva=> parseInt(reserva.id_restaurante) === this.restaurant_index);
+            }
+            if(this.cliente_index){
+                reservasAux = reservasAux.filter(reserva=> parseInt(reserva.id_cliente) === this.cliente_index);
+            }
+            if(this.fecha){
+                reservasAux = reservasAux.filter(reserva=>(reserva.fecha.substring(0, 10) === this.fecha));
+            }
+            this.showingReservas = reservasAux;
+            console.log(this.allReservas);
         }
     }
 })
