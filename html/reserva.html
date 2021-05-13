@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <p class="Mensaje Error" v-if="mensaje_error!=null">{{mensaje_error}}</p>
+        <label>Selecciona el restaurante</label>
+        <select name="" id="" v-model.number="restaurant_index">
+            <option v-for="restaurante in restaurantes" :value="restaurante.id" selected>{{restaurante.nombre}}</option>
+        </select>
+        <br>
+        <label>Ingrese la fecha</label>
+        <input type="date" v-model="fecha">
+        <br>
+        <label> Selecciona hora inicio de la reserva</label>
+        <select name="" id="" v-model.number="hora_inicio">
+            <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
+        </select>
+        <label> Selecciona hora fin de la reserva</label>
+        <select name="" id="" v-model.number="hora_fin">
+            <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
+        </select>
+        <br>
+        <button @click="buscar_reservas"> Buscar Reservas Disponibles</button>
+        <div class="MesasDisponibles" v-if="mesasDispobibles.length">
+            <table>
+                <tr>
+                    <td>nombre</td>
+                    <td> Planta</td>
+                    <td>Capacidad</td>
+                    <td>Seleccione la opcion</td>
+                </tr>
+                <tr v-for="mesa in mesasDispobibles">
+                    <td>{{mesa.nombre}}</td>
+                    <td> {{mesa.planta}}</td>
+                    <td>{{mesa.capacidad}}</td>
+                    <td> <input type="radio" id="uno" :value="mesa" v-model="mesaObject"> </td>
+                </tr>
+            </table>
+            <br><br>
+            <div class="Buscar_cedula">
+                <label>Ingrese su numero cedula:</label>
+                <input type="number" v-model="cliente.cedula">
+                <button @click="buscar_cedula">Buscar Cedula</button>
+            </div>
+        </div>
+
+
+
+        <div class="ingresarCliente" v-if="!findCedula">
+            <h3>El Cliente con cedula {{cliente.cedula}}, aun no esta registrado, por favor ingrese sus datos</h3>
+            <label>Ingrese el nombre</label> <input v-model="cliente.nombre" type="text"><br>
+            <label>Ingrese el apellido</label> <input v-model="cliente.apellido" type="text"><br>
+            <label> Cedula: </label> {{cliente.cedula}}<br>
+            <button @click="confirmar_datos">Confirmar Datos</button>
+        </div>
+
+        <div class="detallesReserva" v-if="reservaLista">
+            <table>
+                <tr>
+                    <td> fecha</td>
+                    <td>HoraInicioReserva</td>
+                    <td>HoraFinReserva</td>   
+                    <td>Nombre de la mesa</td>
+                    <td>Capacidad de la mesa</td>
+                    <td>Nombre Cliente</td>
+                    <td>Apellido Cliente</td>
+                    <td>CedulaCliente</td>
+                </tr>
+                <tr>
+                    <td>{{reserva.fecha}}</td>
+                    <td>{{reserva.hora_inicial}}:00</td>
+                    <td>{{reserva.hora_final}}:00</td>
+                    <td>{{mesaObject.nombre}}</td>
+                    <td>{{reserva.cantidad_solicitada}}</td>
+                    
+                    <td>{{cliente.nombre}}</td>
+                    <td>{{cliente.apellido}}</td>
+                    <td>{{cliente.cedula}}</td>
+
+                </tr>
+            </table>
+            <button @click="guardar_reserva">Guardar reserva</button>
+
+        </div>
+
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../js/reserva.js"></script>
+</body>
+
+</html>
