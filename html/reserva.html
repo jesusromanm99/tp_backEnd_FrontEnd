@@ -19,9 +19,16 @@
             </div>
             
             <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav m">
                     <li class="nav-item">
                         <a class="nav-link active" href="./listaReservas.html">Lista de reservas
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./GraficarMesa.html">Visualizar Mesas
                             <span class="visually-hidden">(current)</span>
                         </a>
                     </li>
@@ -68,7 +75,7 @@
                         <div class="col-12 col-sm-6">
                             <label for="horaFin"> Selecciona hora fin de la reserva</label>
                             <select name="" required id="horaFin" v-model.number="hora_fin" class="form-control">
-                                <option v-for="hora in rango_horas_inicio" selected>{{hora}}</option>
+                                <option v-for="hora in rango_horas_fin" selected>{{hora}}</option>
                             </select>
                         </div>
                     </div>

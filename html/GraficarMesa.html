@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <div class="">
+                <a class="navbar-brand" href="./reserva.html">Reservar</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./listaReservas.html">Lista de reservas
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-md-auto">
+                    <li class="nav-item">
+                        <a target="_blank" rel="noopener" class="nav-link" href="https://github.com/jesusromanm99/tp_backEnd_FrontEnd"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="app">
+            <div class="row">
+                <div class="col-5">
+                    <label for="selectRestaurant">Selecciona el restaurante</label>
+                    <select class="form-control" @change="onSelectRestaurant" name="" id="selectRestaurant" v-model.number="id_Restaurante" class="form-control">
+                      <option v-for="restaurante in restaurantes" :value="restaurante.id">{{restaurante.nombre}}</option>
+                    </select>
+                </div>
+                <div class="col-5">
+                    <label>Seleccione la Planta</label>
+                    <select class="form-control" name="" id="selectRestaurant" v-model.number="mesa_piso" class="form-control">
+                        <option v-for="piso in pisos" :value="piso">{{piso}}</option>
+                      </select>      
+                </div>
+            </div>
+            <h2 v-if="messageError!=null" class="alert alert-danger">{{messageError}}</h2>
+            <div v-if="banGraficar">
+                <h2 class="text-center" v-if="mesas_plantas.length">
+                    Esta es la ubicacio de las mesas para el piso {{mesa_piso}}
+                </h2>
+                <h2 class="text-center" v-else>
+                    No existen mesas en el piso {{mesa_piso}}
+                </h2>
+            </div>
+            <div class="row text-center mt-4"> <!--BUTTON RESERVA-->
+                <div class="col-12">
+                    <button @click="graficar_mesas" class="btn btn-primary">Graficar</button>
+                </div> 
+            </div> 
+            <br> 
+            
+                <canvas v-show="showCanvas" id="myCanvas" :width="medidas.canvas_w" :height="medidas.canvas_h" style="border:1px solid #000000; background-color: #FEFCF0;">
+                    
+                </canvas>
+        
+                
+        </div>
+    </div>
+    
+
+    <style>
+        #app{
+            border: 1px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../js/GraficarMesa.js"></script>
+</body>
+</html>

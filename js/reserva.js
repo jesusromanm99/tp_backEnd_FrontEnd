@@ -1,5 +1,6 @@
 const ENDPOINT="http://localhost:9090/"
 
+
 const get_todos_restaurantes = async()=>{
     const res = await fetch(`${ENDPOINT}api/restaurant/`);
     if(res){
@@ -32,8 +33,8 @@ const get_mesas_ocupadas= async (id_res,fecha,hora_inicio,hora_fin)=>{
     res= await fetch(ENDPOINT+"api/reserva/mesas/"+params)
     if(res) return res.json()
 }
-const get_todas_mesas= async(mesas_ocupadas)=> {
-    mesas= await fetch(ENDPOINT+"api/mesa")
+const get_todas_mesas= async(id_restaurant)=> {
+    mesas= await fetch(ENDPOINT+"api/mesa/restaurantes/"+id_restaurant)
     if( mesas){
         return mesas.json()
     }
@@ -82,10 +83,15 @@ const app= new Vue({
         mensaje_error:null,
         mensaje_exito:null,
     },
-    beforeCreate: async function() {
-        this.restaurantes = await get_todos_restaurantes();
+    mounted:function(){
+        this.beforeCreate() //method1 will execute at pageload
     },
     methods:{
+        beforeCreate: async function() {
+            this.restaurantes = await get_todos_restaurantes();
+            console.log("aca entreee",this.restaurantes)
+
+        },
         buscar_reservas:async function(){
             if(this.hora_inicio<=15 && this.hora_fin>15){
                 this.mensaje_error="El rango de hora seleccionada es el incorrecta"
@@ -99,7 +105,7 @@ const app= new Vue({
                 this.mensaje_error=null
                 mesas_ocupadas= await get_mesas_ocupadas(this.restaurant_index,this.fecha,this.hora_inicio,this.hora_fin)
                 console.log(mesas_ocupadas)
-                mesas= await get_todas_mesas(mesas_ocupadas)  
+                mesas= await get_todas_mesas(this.restaurant_index)  
                 console.log("todas las mesas",mesas)    
                 this.mesasDispobibles=get_mesas_disponibles(mesas,mesas_ocupadas);
                 console.log("mesasDisponibles",this.mesasDispobibles)
