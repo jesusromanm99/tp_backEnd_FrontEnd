@@ -45,7 +45,7 @@ const get_totos_clientes = async () => {
     try {
         const res = await fetch(`${ENDPOINT}api/cliente`);
         if(res){
-            const data = await res.json;
+            const data = await res.json();
             return data;
         }
     } catch (error) {
@@ -82,6 +82,71 @@ const get_consumo_detalle = async(idConsumo)=>{
         return consumo;
     }
 }
+const crear_consumo = async(id_mesa, id_cliente ) => {
+    try {
+        const req = await fetch(`${ENDPOINT}api/consumo`, {
+            method: 'POST',
+            body:JSON.stringify({
+                id_mesa,
+                id_cliente
+            }),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error(`Error guardando cabecera de consumo mesa ${id_mesa} cliente ${id_cliente}`);
+        console.error(error);
+    }
+
+}
+const cerrar_mesa = async(consumoId)=> {
+    try {
+        const req = await fetch(`${ENDPOINT}api/consumo/cerrarMesa/${consumoId}`,{
+            method:'PUT'
+        });   
+    } catch (error) {
+        console.error('Error cerrando la mesa');
+        console.error(error);
+    }
+
+}
+const cambiar_cliente = async(id, id_cliente) => {
+    try {
+        const req = await fetch(`${ENDPOINT}api/consumo`, {
+            method: 'PUT',
+            body:JSON.stringify({
+                id,
+                id_cliente
+            }),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        });
+        return await req.json();
+    } catch (error) {
+        console.error(`Error cambiando cabecera de consumo ${id} cliente ${id_cliente}`);
+        console.error(error);
+    }
+
+}
+const crear_cliente = async(clienteACrear ) => {
+    try {
+        const req = await fetch(`${ENDPOINT}api/cliente`, {
+            method: 'POST',
+            body:JSON.stringify(clienteACrear),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await req.json();
+        return data;
+    } catch (error) {
+        console.error(`Error guardando cliente ${clienteACrear.nombre} ${clienteACrear.apellido}`);
+        console.error(error);
+    }
+
+}
 const app= new Vue({
     el:"#app",
     data:{
@@ -90,6 +155,7 @@ const app= new Vue({
         idRestaurant: null,
         idMesa: null,
         mesa:null,
+        estadoMesa: null,
         productos:[],
         listaDetalles:[],
         cliente:null,
@@ -97,12 +163,20 @@ const app= new Vue({
         modalAgregarDetalle: null,
         modalAgregarCliente: null,
         listadoClientes: [],
+        listadoClientesFiltrado: [],
+        clienteParaCrear: {
+            nombre:"",
+            apellido:"",
+            cedula:"",
+        },
+        isShowingModalAgregarCliente: false,
     },
     beforeCreate: async function() {
         try {
             this.restaurantes = await get_todos_restaurantes();   
             this.productos = await get_todos_productos();
             this.listadoClientes = await get_totos_clientes();
+            this.listadoClientesFiltrado = this.listadoClientes;
         } catch (error) {
             console.error('Error en get Restaurants');
             console.error(error);
@@ -121,15 +195,15 @@ const app= new Vue({
             }
         },
         getEstadoMesa: async function(){
+            this.cliente = null;
+            this.listaDetalles = [];
             try {
-                const obj = this.mesas.filter(mesa => mesa.id === this.idMesa)[0];
-                obj.estado = await get_estado_mesa(this.idMesa); 
-                if(obj.estado.id_cliente){
-                    this.cliente = await get_cliente(obj.estado.id_cliente)
-                    this.listaDetalles = await get_consumo_detalle(obj.estado.id);
+                this.mesa = this.mesas.filter(mesa => mesa.id === this.idMesa)[0];
+                this.estadoMesa = await get_estado_mesa(this.idMesa); 
+                if(this.estadoMesa.id_cliente){
+                    this.cliente = await get_cliente(this.estadoMesa.id_cliente)
+                    this.listaDetalles = await get_consumo_detalle(this.estadoMesa.id);
                 }
-                console.log(obj);
-                this.mesa = obj;
             } catch (error) {
                 console.error('Error en get estado de la mesa' + this.idMesa);
                 console.error(error);
@@ -150,10 +224,13 @@ const app= new Vue({
             this.modalAgregarDetalle = new bootstrap.Modal(container); // relatedTarget
             this.modalAgregarDetalle.show();
         },
+        handleChange: function () {
+            
+        },
         agregarDetalles: async function(event){
             
             try {
-                await guardar_reserva( this.mesa.estado.id ,this.detalleParaAgregar.idProducto, this.detalleParaAgregar.cantidad);    
+                await guardar_reserva( this.estadoMesa.id ,this.detalleParaAgregar.idProducto, this.detalleParaAgregar.cantidad);    
                 this.modalAgregarDetalle.hide();
                 this.getEstadoMesa();
             } catch (error) {
@@ -161,8 +238,15 @@ const app= new Vue({
                 console.error(error);
             }
         },
-        seleccionarCliente: async function(){
-
+        seleccionarCliente: async function(idCliente){
+            if(!this.cliente){ //La mesa esta abierta
+                await crear_consumo(this.idMesa, idCliente);
+            }else{
+                const data = await cambiar_cliente( this.estadoMesa.id, idCliente );
+            }
+            
+            await this.getEstadoMesa();
+            this.modalAgregarCliente.hide();
         },
         agregarCliente: async function(){
 
@@ -171,6 +255,49 @@ const app= new Vue({
             const container = document.getElementById('modalAgregarCliente');
             this.modalAgregarCliente = new bootstrap.Modal(container); // relatedTarget
             this.modalAgregarCliente.show();
-        },  
+        }, 
+        cerrarMesa: async function(){
+            await cerrar_mesa(this.estadoMesa.id);
+            this.getEstadoMesa();
+        },
+        cerrarModalAgregarCliente: function(){
+            this.modalAgregarCliente.hide();
+        },
+        cerrarModalAgregarDetalles: function(){
+            this.modalAgregarDetalle.hide();
+        },
+        showModalAgregarCliente: function(){
+            this.isShowingModalAgregarCliente = !this.isShowingModalAgregarCliente;
+        },
+        handleAgregarClienteChange: function(event){
+            this.clienteParaCrear = {
+                ...this.clienteParaCrear,
+                [event.target.name]: event.target.value
+            }
+        },
+        saveAndSetCliente: async function(){
+            try {
+                const nuevoCliente = await crear_cliente(this.clienteParaCrear);
+                if(nuevoCliente){
+                    if(this.cliente){
+                        await cambiar_cliente(this.estadoMesa.id, nuevoCliente.id);
+                    }else{
+                        //crear consumo
+                        await crear_consumo( this.idMesa, nuevoCliente.id);
+                    }
+                    this.cliente = nuevoCliente;
+                    
+                    await this.getEstadoMesa();
+                    this.cerrarModalAgregarCliente();
+                }else{
+                    console.log('ERROR: No se creo nuevo cliente...')
+                }
+            } catch (error) {
+                console.error('Error creando consumo o cliente');
+                console.error(error);
+            }
+            
+            
+        },
     }
 })
