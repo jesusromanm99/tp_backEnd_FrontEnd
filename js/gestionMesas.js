@@ -147,6 +147,9 @@ const crear_cliente = async(clienteACrear ) => {
     }
 
 }
+const genFormattedNumber = (num) => {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+}
 const app= new Vue({
     el:"#app",
     data:{
@@ -258,6 +261,7 @@ const app= new Vue({
         }, 
         cerrarMesa: async function(){
             await cerrar_mesa(this.estadoMesa.id);
+            this.generarFactura();
             this.getEstadoMesa();
         },
         cerrarModalAgregarCliente: function(){
@@ -299,5 +303,80 @@ const app= new Vue({
             
             
         },
+        filterClientes: function(event){
+            const value = event.target.value;
+            try {
+                this.listadoClientesFiltrado = this.listadoClientes.filter( cliente=>(
+                    cliente.nombre.toLowerCase().includes(value.toLowerCase()) ||
+                    cliente.apellido.toLowerCase().includes(value.toLowerCase()) ||
+                    cliente.cedula.toString().includes(value.toLowerCase())
+                ));    
+            } catch (error) {
+                console.error('ERror filtrando');
+                console.error(error);
+            }
+            
+        },
+        generarFactura: function(){
+            const props = {
+                
+                returnJsPDFDocObject: true,
+                fileName: "Factura restaurapp 2021",
+                orientationLandscape: false,
+                logo: {
+                    src: "https://raw.githubusercontent.com/edisonneza/jspdf-invoice-template/demo/images/logo.png",
+                    width: 53.33, //aspect ratio = width/height
+                    height: 26.66,
+                    margin: {
+                        top: 0, //negative or positive num, from the current position
+                        left: 0 //negative or positive num, from the current position
+                    }
+                },
+                business: {
+                    name: "Jesus & David Co.",
+                    address: "Mcal.Lopez, San Martin, Asuncion 201",
+                    phone: "(+595) 81321312",
+                    email: "nundavid99@gmail.com",
+                    email_1: "jesusroman99@gmail.com",
+                    website: "www.github.com/davinun99",
+                },
+                contact: {
+                    label: "A nombre de :",
+                    name: `${this.cliente.nombre} ${this.cliente.apellido}`,
+                    address: "Mcal. Estigarribia c/ Eduardo P. Peña",
+                    phone: "(+595) 81222222",
+                    email: "profeRodrigo@pol.una.py",
+                    otherInfo: `RUC: ${this.cliente.cedula}`,
+                },
+                invoice: {
+                    label: "Factura numero: ",
+                    num: 19,
+                    invDate: "Fecha de pago: 01/01/2021 18:12",
+                    invGenDate: "Fecha de facturacion: 02/02/2021 10:17",
+                    headerBorder: false,
+                    tableBodyBorder: false,
+                    header: ["#", "Descripcion", "Precio", "Cantidad", "Total"],
+                    table: this.listaDetalles.map((detalle, index) => ([
+                        index + 1,
+                        `${detalle.producto.nombre}`,
+                        Number(detalle.producto.precio),
+                        Number(detalle.cantidad),
+                        Number(detalle.producto.precio) * Number(detalle.cantidad)
+                    ])),
+                    invTotalLabel: "Total:",
+                    invTotal: genFormattedNumber(this.estadoMesa.total),
+                    invCurrency: "Gs.",
+                    invDescLabel: "Nota adicional",
+                    invDesc: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary.",
+                },
+                footer: {
+                    text: "Factura creada por computadora, no es valida para ningun proposito, solo elaboramos un trabajo practico simple.",
+                },
+                pageEnable: true,
+                pageLabel: "Page ",
+            };
+            jsPDFInvoiceTemplate.default( props );
+
+        }
     }
 })
